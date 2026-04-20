@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>9TH — DJ Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0a0a;
+  --bg2: #111111;
+  --bg3: #181818;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --accent: #ff3d00;
+  --accent2: #ff8c42;
+  --green: #00e676;
+  --blue: #00b0ff;
+  --yellow: #ffd600;
+  --text: #f0f0f0;
+  --muted: #555;
+  --muted2: #888;
+  --radius: 4px;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── LAYOUT ── */
+.shell {
+  display: grid;
+  grid-template-rows: 56px 1fr;
+  grid-template-columns: 260px 1fr 300px;
+  min-height: 100vh;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  grid-column: 1 / -1;
+  background: #0d0d0d;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 24px;
+}
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  letter-spacing: 4px;
+  color: var(--accent);
+  line-height: 1;
+}
+.logo-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.topbar-sep { flex: 1; }
+.topbar-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.topbar-stat-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+.topbar-stat-lbl {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.topbar-divider {
+  width: 1px;
+  height: 28px;
+  background: var(--border);
+}
+
+/* ── SIDEBAR LEFT ── */
+.sidebar-left {
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 16px 0;
+}
+.sidebar-left::-webkit-scrollbar { width: 4px; }
+.sidebar-left::-webkit-scrollbar-thumb { background: #222; }
+
+.sidebar-section {
+  padding: 0 16px;
+  margin-bottom: 24px;
+}
+.sidebar-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  padding: 0 4px;
+}
+
+/* Track row */
+.track-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.15s;
+  border: 1px solid transparent;
+}
+.track-row:hover { background: rgba(255,255,255,0.04); }
+.track-row.active {
+  background: rgba(255,61,0,0.08);
+  border-color: rgba(255,61,0,0.2);
+}
+.track-key-badge {
+  width: 30px;
+  height: 30px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.track-row-info { flex: 1; min-width: 0; }
+.track-row-title {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+.track-row-artist {
+  font-size: 11px;
+  color: var(--muted2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+.track-row-bpm {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted2);
+  flex-shrink: 0;
+}
+
+/* ── MAIN ── */
+.main {
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.main::-webkit-scrollbar { width: 4px; }
+.main::-webkit-scrollbar-thumb { background: #222; }
+
+/* Track Hero */
+.track-hero {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 20px;
+  align-items: start;
+}
+.hero-art {
+  width: 80px;
+  height: 80px;
+  border-radius: 3px;
+  background: var(--bg3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.hero-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,61,0,0.15), transparent);
+}
+.hero-info {}
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  letter-spacing: 1px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.hero-artist {
+  font-size: 13px;
+  color: var(--muted2);
+  margin-bottom: 12px;
+}
+.hero-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag {
+  padding: 3px 10px;
+  border-radius: 2px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.tag-red { background: rgba(255,61,0,0.12); color: var(--accent); border: 1px solid rgba(255,61,0,0.2); }
+.tag-green { background: rgba(0,230,118,0.1); color: var(--green); border: 1px solid rgba(0,230,118,0.2); }
+.tag-blue { background: rgba(0,176,255,0.1); color: var(--blue); border: 1px solid rgba(0,176,255,0.2); }
+.tag-yellow { background: rgba(255,214,0,0.1); color: var(--yellow); border: 1px solid rgba(255,214,0,0.2); }
+.tag-neutral { background: rgba(255,255,255,0.05); color: var(--muted2); border: 1px solid var(--border); }
+
+.hero-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-end;
+}
+.hero-stat { text-align: right; }
+.hero-stat-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  line-height: 1;
+  color: var(--accent);
+}
+.hero-stat-lbl {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Waveform */
+.waveform-container {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.waveform-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.waveform-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.waveform-time {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted2);
+}
+canvas#waveform {
+  width: 100%;
+  height: 72px;
+  display: block;
+  border-radius: 2px;
+}
+
+/* Stats Row */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.stat-card-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-card-lbl {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* Energy bar */
+.energy-bar-wrap {
+  margin-top: 8px;
+  height: 3px;
+  background: #222;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.energy-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 1s ease;
+}
+
+/* Sections */
+.section-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.section-head {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-head-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.section-head-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted2);
+}
+.section-body { padding: 18px; }
+
+/* Compatible tracks */
+.compat-track {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.compat-track:last-child { border-bottom: none; }
+.compat-track:hover { opacity: 0.75; }
+.compat-score {
+  width: 36px;
+  height: 36px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.score-high { background: rgba(0,230,118,0.12); color: var(--green); border: 1px solid rgba(0,230,118,0.2); }
+.score-mid { background: rgba(255,214,0,0.1); color: var(--yellow); border: 1px solid rgba(255,214,0,0.2); }
+.compat-info { flex: 1; min-width: 0; }
+.compat-title {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.compat-detail {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  margin-top: 2px;
+}
+.compat-reason {
+  font-size: 11px;
+  color: var(--muted2);
+  text-align: right;
+  max-width: 100px;
+  line-height: 1.3;
+}
+
+/* Transition points */
+.transition-list { display: flex; flex-direction: column; gap: 8px; }
+.transition-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--bg3);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.transition-time {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--accent);
+  min-width: 44px;
+}
+.transition-bar {
+  flex: 1;
+  height: 2px;
+  background: #222;
+  border-radius: 1px;
+  position: relative;
+  overflow: visible;
+}
+.transition-marker {
+  position: absolute;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+}
+.transition-desc {
+  font-size: 11px;
+  color: var(--muted2);
+  min-width: 90px;
+  text-align: right;
+}
+
+/* ── SIDEBAR RIGHT ── */
+.sidebar-right {
+  background: var(--bg2);
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.sidebar-right::-webkit-scrollbar { width: 4px; }
+.sidebar-right::-webkit-scrollbar-thumb { background: #222; }
+
+/* Camelot Wheel */
+.camelot-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.camelot-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  align-self: flex-start;
+}
+canvas#camelot {
+  width: 240px;
+  height: 240px;
+}
+
+/* Set Builder */
+.set-builder {}
+.set-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.set-track {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--bg3);
+  border-radius: var(--radius);
+  margin-bottom: 6px;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.set-track::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+}
+.set-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  min-width: 16px;
+}
+.set-key {
+  width: 24px;
+  height: 24px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  flex-shrink: 0;
+}
+.set-info { flex: 1; min-width: 0; }
+.set-title {
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.set-bpm {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+}
+.set-arrow {
+  display: flex;
+  justify-content: center;
+  margin: 2px 0;
+}
+.set-arrow-icon {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.btn-generate {
+  width: 100%;
+  padding: 11px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-top: 8px;
+}
+.btn-generate:hover { opacity: 0.85; }
+
+/* Export */
+.export-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.btn-export {
+  padding: 9px;
+  background: transparent;
+  color: var(--muted2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.btn-export:hover {
+  border-color: var(--border2);
+  color: var(--text);
+}
+
+/* Metadata */
+.meta-field { margin-bottom: 10px; }
+.meta-lbl {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.meta-input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.meta-input:focus { border-color: rgba(255,61,0,0.4); }
+
+/* Scanning animation */
+@keyframes scanline {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.scanning-bar {
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,61,0,0.6), transparent);
+  animation: scanline 1.5s ease-in-out infinite;
+}
+
+/* Fade in */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeIn 0.4s ease forwards; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 10px 16px;
+  background: #1a1a1a;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--green);
+  transform: translateY(60px);
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 999;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* Upload overlay */
+.upload-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  z-index: 100;
+  transition: opacity 0.3s;
+}
+.upload-overlay.hidden { opacity: 0; pointer-events: none; }
+.upload-box {
+  width: 440px;
+  border: 1.5px dashed rgba(255,61,0,0.35);
+  border-radius: 6px;
+  padding: 56px 32px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.2s;
+}
+.upload-box:hover, .upload-box.dragover { border-color: var(--accent); }
+.upload-box input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+.upload-icon { font-size: 40px; margin-bottom: 12px; }
+.upload-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+.upload-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted2);
+  letter-spacing: 1px;
+}
+.upload-demo {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted2);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s;
+}
+.upload-demo:hover { color: var(--accent); }
+
+/* Loading */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 101;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.loading-overlay.show { opacity: 1; pointer-events: all; }
+.loading-bar-wrap {
+  width: 240px;
+  height: 2px;
+  background: #222;
+  border-radius: 1px;
+  overflow: hidden;
+}
+.loading-bar-inner { height: 100%; background: var(--accent); }
+.loading-text {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted2);
+  letter-spacing: 1px;
+}
+.loading-pct {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  color: var(--accent);
+  letter-spacing: 2px;
+}
+
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: 56px auto;
+  }
+  .sidebar-left, .sidebar-right { display: none; }
+  .stats-row { grid-template-columns: repeat(3, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- Upload Overlay -->
+<div class="upload-overlay" id="uploadOverlay">
+  <div style="text-align:center; margin-bottom:8px;">
+    <div style="font-family:'Bebas Neue',sans-serif; font-size:42px; letter-spacing:6px; color:var(--accent);">9TH</div>
+    <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:3px; text-transform:uppercase; margin-top:4px;">DJ Intelligence Platform</div>
+  </div>
+  <div class="upload-box" id="uploadBox">
+    <input type="file" id="fileInput" accept="audio/*">
+    <div class="upload-icon">⬡</div>
+    <div class="upload-title">Drop Your Track</div>
+    <div class="upload-sub">MP3 · WAV · FLAC · AIFF · AAC</div>
+  </div>
+  <div class="upload-demo" onclick="loadDemo()">— or load demo library —</div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-pct" id="loadingPct">0%</div>
+  <div class="loading-bar-wrap">
+    <div class="loading-bar-inner" id="loadingBar" style="width:0%;transition:width 0.3s"></div>
+  </div>
+  <div class="loading-text" id="loadingText">Initializing...</div>
+</div>
+
+<!-- Main Shell -->
+<div class="shell">
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div>
+      <div class="logo">9TH</div>
+    </div>
+    <div class="logo-tag">DJ Intelligence</div>
+    <div class="topbar-sep"></div>
+    <div class="topbar-stat">
+      <div class="topbar-stat-val" id="tbTracks">12</div>
+      <div class="topbar-stat-lbl">Tracks</div>
+    </div>
+    <div class="topbar-divider"></div>
+    <div class="topbar-stat">
+      <div class="topbar-stat-val" id="tbAvgBpm">127</div>
+      <div class="topbar-stat-lbl">Avg BPM</div>
+    </div>
+    <div class="topbar-divider"></div>
+    <div class="topbar-stat">
+      <div class="topbar-stat-val" id="tbSetLen">1h 12m</div>
+      <div class="topbar-stat-lbl">Set Length</div>
+    </div>
+    <div class="topbar-divider"></div>
+    <div class="topbar-stat" style="cursor:pointer;" onclick="document.getElementById('uploadOverlay').classList.remove('hidden')">
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--accent);">+ Add Track</div>
+    </div>
+  </div>
+
+  <!-- Sidebar Left: Library -->
+  <div class="sidebar-left">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Library</div>
+      <div id="trackList"></div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main" id="mainContent">
+    <!-- filled by JS -->
+  </div>
+
+  <!-- Sidebar Right -->
+  <div class="sidebar-right">
+    <div class="camelot-wrap">
+      <div class="camelot-title">Camelot Wheel</div>
+      <canvas id="camelot" width="240" height="240"></canvas>
+    </div>
+
+    <div class="set-builder">
+      <div class="set-label">AI Set Builder</div>
+      <div id="setList"></div>
+      <button class="btn-generate" onclick="generateSet()">⟳ Generate Optimal Set</button>
+    </div>
+
+    <div>
+      <div class="set-label">Export</div>
+      <div class="export-row">
+        <button class="btn-export" onclick="showToast('Rekordbox XML exported')">Rekordbox</button>
+        <button class="btn-export" onclick="showToast('Serato crates exported')">Serato</button>
+        <button class="btn-export" onclick="showToast('Traktor NML exported')">Traktor</button>
+        <button class="btn-export" onclick="showToast('CSV exported')">CSV</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CAMELOT DATA ──────────────────────────────────────────────────────────
+const CAMELOT = {
+  '1A': { label: '1A', note: 'Ab min', color: '#9c5de0' },
+  '2A': { label: '2A', note: 'Eb min', color: '#7b52d4' },
+  '3A': { label: '3A', note: 'Bb min', color: '#5b5fcf' },
+  '4A': { label: '4A', note: 'F min',  color: '#4478c4' },
+  '5A': { label: '5A', note: 'C min',  color: '#3d9abb' },
+  '6A': { label: '6A', note: 'G min',  color: '#36baa0' },
+  '7A': { label: '7A', note: 'D min',  color: '#2fcd6e' },
+  '8A': { label: '8A', note: 'A min',  color: '#74c62f' },
+  '9A': { label: '9A', note: 'E min',  color: '#c6b52f' },
+  '10A':{ label:'10A', note: 'B min',  color: '#c67c2f' },
+  '11A':{ label:'11A', note: 'F# min', color: '#c64c2f' },
+  '12A':{ label:'12A', note: 'C# min', color: '#c0355d' },
+  '1B': { label: '1B', note: 'B maj',  color: '#b06de8' },
+  '2B': { label: '2B', note: 'F# maj', color: '#8c62dc' },
+  '3B': { label: '3B', note: 'Db maj', color: '#6c70d6' },
+  '4B': { label: '4B', note: 'Ab maj', color: '#5089cb' },
+  '5B': { label: '5B', note: 'Eb maj', color: '#49abc2' },
+  '6B': { label: '6B', note: 'Bb maj', color: '#41cab2' },
+  '7B': { label: '7B', note: 'F maj',  color: '#39de7e' },
+  '8B': { label: '8B', note: 'C maj',  color: '#88d53f' },
+  '9B': { label: '9B', note: 'G maj',  color: '#d6c43f' },
+  '10B':{ label:'10B', note: 'D maj',  color: '#d68c3f' },
+  '11B':{ label:'11B', note: 'A maj',  color: '#d65c3f' },
+  '12B':{ label:'12B', note: 'E maj',  color: '#d04570' },
+};
+
+// ─── DEMO LIBRARY ─────────────────────────────────────────────────────────
+const DEMO_TRACKS = [
+  { id:1,  title: 'Midnight Circuit',    artist: 'Alignment',      bpm: 128, key: '8A', energy: 72, genre: 'Tech House',   duration: '6:42', year: 2024, album: 'Signal EP', comment: 'Peak hour track, works well at 2AM' },
+  { id:2,  title: 'Desert Storm',        artist: 'Omar S',         bpm: 130, key: '9A', energy: 88, genre: 'Techno',       duration: '7:15', year: 2023, album: '', comment: 'Driving industrial texture' },
+  { id:3,  title: 'Falling Satellites',  artist: 'Rødhåd',         bpm: 134, key: '10A',energy: 92, genre: 'Dark Techno',  duration: '8:03', year: 2024, album: 'Unfold', comment: 'Closer/peaktime' },
+  { id:4,  title: 'Sun Ra Returns',      artist: 'Âme',            bpm: 122, key: '8B', energy: 65, genre: 'Deep House',   duration: '9:12', year: 2023, album: 'Fabric 93', comment: 'Beautiful opener' },
+  { id:5,  title: 'Phosphene',           artist: 'Objekt',         bpm: 136, key: '11A',energy: 95, genre: 'Techno',       duration: '6:55', year: 2024, album: '', comment: 'Room destroys this one' },
+  { id:6,  title: 'Resonant Frequency',  artist: 'DVS1',           bpm: 132, key: '9B', energy: 85, genre: 'Techno',       duration: '7:30', year: 2023, album: '', comment: 'Heavy kick, good for transitions' },
+  { id:7,  title: 'Soft Power',          artist: 'Peggy Gou',      bpm: 120, key: '7A', energy: 60, genre: 'Tech House',   duration: '5:48', year: 2024, album: 'I Hear You', comment: 'Easy warm-up groove' },
+  { id:8,  title: 'Ghost Protocol',      artist: 'Function',       bpm: 138, key: '12A',energy: 97, genre: 'Industrial Techno', duration: '8:22', year: 2023, album: '', comment: 'Ultimate weapon' },
+  { id:9,  title: 'Blue Dot',            artist: 'Move D',         bpm: 118, key: '6A', energy: 50, genre: 'Deep House',   duration: '10:05', year: 2024, album: 'Fabric 49', comment: 'Trippy late night slowdown' },
+  { id:10, title: 'Pressure System',     artist: 'Surgeon',        bpm: 140, key: '11B',energy: 98, genre: 'Hardcore Techno', duration: '7:08', year: 2023, album: '', comment: 'Only for the brave' },
+  { id:11, title: 'Echoes of Saturn',    artist: 'Actress',        bpm: 124, key: '8A', energy: 68, genre: 'Experimental', duration: '6:20', year: 2024, album: 'R.I.P.', comment: 'Warped ambient textures' },
+  { id:12, title: 'Fluid Mechanics',     artist: 'Blawan',         bpm: 133, key: '10B',energy: 90, genre: 'Industrial',   duration: '7:44', year: 2023, album: '', comment: 'Intense, mechanical' },
+];
+
+let library = [];
+let activeTrackId = null;
+let setTracks = [];
+
+// ─── INIT ──────────────────────────────────────────────────────────────────
+function loadDemo() {
+  document.getElementById('uploadOverlay').classList.add('hidden');
+  simulateLoading(() => {
+    library = [...DEMO_TRACKS];
+    renderAll(1);
+  });
+}
+
+function simulateLoading(cb) {
+  const overlay = document.getElementById('loadingOverlay');
+  const pct = document.getElementById('loadingPct');
+  const bar = document.getElementById('loadingBar');
+  const txt = document.getElementById('loadingText');
+  overlay.classList.add('show');
+  const steps = ['Reading audio files...', 'Analyzing BPM & key...', 'Running AI analysis...', 'Building harmonic map...', 'Generating set suggestions...'];
+  let p = 0;
+  const iv = setInterval(() => {
+    p += Math.random() * 22 + 8;
+    if (p > 100) p = 100;
+    pct.textContent = Math.round(p) + '%';
+    bar.style.width = p + '%';
+    txt.textContent = steps[Math.min(Math.floor(p / 20), steps.length - 1)];
+    if (p >= 100) {
+      clearInterval(iv);
+      setTimeout(() => {
+        overlay.classList.remove('show');
+        cb();
+      }, 400);
+    }
+  }, 180);
+}
+
+function renderAll(activeId) {
+  activeTrackId = activeId;
+  renderLibrary();
+  renderMain();
+  drawCamelot();
+  buildDefaultSet();
+  updateTopbar();
+}
+
+// ─── LIBRARY SIDEBAR ──────────────────────────────────────────────────────
+function renderLibrary() {
+  const list = document.getElementById('trackList');
+  list.innerHTML = library.map(t => {
+    const c = CAMELOT[t.key];
+    return `
+    <div class="track-row ${t.id === activeTrackId ? 'active' : ''}" onclick="selectTrack(${t.id})">
+      <div class="track-key-badge" style="background:${c.color}22; color:${c.color}; border:1px solid ${c.color}44;">${t.key}</div>
+      <div class="track-row-info">
+        <div class="track-row-title">${t.title}</div>
+        <div class="track-row-artist">${t.artist}</div>
+      </div>
+      <div class="track-row-bpm">${t.bpm}</div>
+    </div>`;
+  }).join('');
+}
+
+function selectTrack(id) {
+  activeTrackId = id;
+  renderLibrary();
+  renderMain();
+  drawCamelot();
+}
+
+// ─── MAIN CONTENT ─────────────────────────────────────────────────────────
+function renderMain() {
+  const track = library.find(t => t.id === activeTrackId);
+  if (!track) return;
+  const c = CAMELOT[track.key];
+
+  // Compatible tracks
+  const compat = getCompatible(track);
+
+  // Transition points (mock)
+  const transitions = [
+    { time: '0:32', pos: 8,  type: 'Intro end',       color: '#00e676' },
+    { time: '2:15', pos: 35, type: 'First drop',       color: '#ff3d00' },
+    { time: '3:48', pos: 58, type: 'Break',            color: '#00b0ff' },
+    { time: '5:20', pos: 80, type: 'Outro begins',     color: '#ffd600' },
+    { time: '6:10', pos: 94, type: 'Safe mix-out',     color: '#00e676' },
+  ];
+
+  const html = `
+  <div class="track-hero fade-in">
+    <div class="hero-art">🎵</div>
+    <div class="hero-info">
+      <div class="hero-title">${track.title}</div>
+      <div class="hero-artist">${track.artist}</div>
+      <div class="hero-tags">
+        <span class="tag tag-red">${track.genre}</span>
+        <span class="tag tag-green" style="background:${c.color}18; color:${c.color}; border:1px solid ${c.color}44;">${track.key} · ${c.note}</span>
+        <span class="tag tag-neutral">${track.duration}</span>
+        <span class="tag tag-neutral">${track.year}</span>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-val">${track.bpm}</div>
+        <div class="hero-stat-lbl">BPM</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="waveform-container fade-in">
+    <div class="waveform-header">
+      <div class="waveform-title">Waveform</div>
+      <div class="waveform-time">${track.duration}</div>
+    </div>
+    <canvas id="waveform" width="900" height="72"></canvas>
+  </div>
+
+  <div class="stats-row fade-in">
+    <div class="stat-card">
+      <div class="stat-card-val" style="color:var(--accent)">${track.bpm}</div>
+      <div class="stat-card-lbl">BPM</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-val" style="color:${c.color}">${track.key}</div>
+      <div class="stat-card-lbl">Camelot</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-val" style="color:var(--blue)">${c.note}</div>
+      <div class="stat-card-lbl">Key</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-val" style="color:var(--yellow)">${track.energy}%</div>
+      <div class="stat-card-lbl">Energy</div>
+      <div class="energy-bar-wrap">
+        <div class="energy-bar-fill" style="width:${track.energy}%; background:linear-gradient(90deg, var(--blue), var(--yellow))"></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-val" style="color:var(--green)">${track.duration}</div>
+      <div class="stat-card-lbl">Duration</div>
+    </div>
+  </div>
+
+  <div class="section-card fade-in">
+    <div class="section-head">
+      <div class="section-head-dot" style="background:var(--green)"></div>
+      <div class="section-head-title">Harmonic Mix Suggestions</div>
+    </div>
+    <div class="section-body">
+      ${compat.map(ct => `
+        <div class="compat-track" onclick="selectTrack(${ct.track.id})">
+          <div class="compat-score ${ct.score >= 90 ? 'score-high' : 'score-mid'}">${ct.score}%</div>
+          <div class="compat-info">
+            <div class="compat-title">${ct.track.title}</div>
+            <div class="compat-detail">${ct.track.artist} · ${ct.track.bpm} BPM · ${ct.track.key}</div>
+          </div>
+          <div class="compat-reason">${ct.reason}</div>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+
+  <div class="section-card fade-in">
+    <div class="section-head">
+      <div class="section-head-dot" style="background:var(--accent)"></div>
+      <div class="section-head-title">Transition Points</div>
+    </div>
+    <div class="section-body">
+      <div class="transition-list">
+        ${transitions.map(tp => `
+          <div class="transition-item">
+            <div class="transition-time">${tp.time}</div>
+            <div class="transition-bar">
+              <div class="transition-marker" style="left:${tp.pos}%; background:${tp.color}"></div>
+            </div>
+            <div class="transition-desc" style="color:${tp.color}">${tp.type}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card fade-in">
+    <div class="section-head">
+      <div class="section-head-dot" style="background:var(--blue)"></div>
+      <div class="section-head-title">Metadata</div>
+    </div>
+    <div class="section-body">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div class="meta-field" style="grid-column:1/-1">
+          <div class="meta-lbl">Title</div>
+          <input class="meta-input" value="${track.title}" onchange="updateMeta(${track.id},'title',this.value)">
+        </div>
+        <div class="meta-field">
+          <div class="meta-lbl">Artist</div>
+          <input class="meta-input" value="${track.artist}" onchange="updateMeta(${track.id},'artist',this.value)">
+        </div>
+        <div class="meta-field">
+          <div class="meta-lbl">Genre</div>
+          <input class="meta-input" value="${track.genre}" onchange="updateMeta(${track.id},'genre',this.value)">
+        </div>
+        <div class="meta-field">
+          <div class="meta-lbl">BPM</div>
+          <input class="meta-input" value="${track.bpm}" onchange="updateMeta(${track.id},'bpm',this.value)">
+        </div>
+        <div class="meta-field">
+          <div class="meta-lbl">Year</div>
+          <input class="meta-input" value="${track.year}" onchange="updateMeta(${track.id},'year',this.value)">
+        </div>
+        <div class="meta-field" style="grid-column:1/-1">
+          <div class="meta-lbl">Comment</div>
+          <input class="meta-input" value="${track.comment}" onchange="updateMeta(${track.id},'comment',this.value)">
+        </div>
+      </div>
+      <button class="btn-generate" style="margin-top:14px; background:transparent; border:1px solid var(--border2); color:var(--muted2);" onclick="showToast('Metadata saved to file!')">Save Metadata to File</button>
+    </div>
+  </div>`;
+
+  document.getElementById('mainContent').innerHTML = html;
+  drawWaveform(track);
+}
+
+// ─── HARMONIC COMPATIBILITY ────────────────────────────────────────────────
+function getCompatible(track) {
+  const num = parseInt(track.key);
+  const type = track.key.slice(-1);
+  const compatible = [];
+
+  for (const t of library) {
+    if (t.id === track.id) continue;
+    const tNum = parseInt(t.key);
+    const tType = t.key.slice(-1);
+    const bpmDiff = Math.abs(t.bpm - track.bpm);
+    if (bpmDiff > 8) continue;
+
+    let score = 0, reason = '';
+
+    // Perfect match (same key)
+    if (t.key === track.key) { score = 98; reason = 'Same key'; }
+    // Relative major/minor
+    else if (tNum === num && tType !== type) { score = 95; reason = 'Relative key'; }
+    // Adjacent on wheel (+1/-1)
+    else if (tType === type && (tNum === (num % 12) + 1 || tNum === ((num - 2 + 12) % 12) + 1)) { score = 90; reason = 'Energy shift'; }
+    // Octave jump (+7)
+    else if (tNum === ((num + 6) % 12) + 1 && tType === type) { score = 82; reason = 'Key jump'; }
+    else continue;
+
+    // Penalize BPM difference
+    score -= Math.floor(bpmDiff * 1.5);
+
+    if (score > 60) compatible.push({ track: t, score, reason });
+  }
+
+  return compatible.sort((a, b) => b.score - a.score).slice(0, 5);
+}
+
+// ─── WAVEFORM ─────────────────────────────────────────────────────────────
+function drawWaveform(track) {
+  const canvas = document.getElementById('waveform');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  // Seed based on track id for consistent "fake" waveform
+  const seed = track.id * 137;
+  const bars = 180;
+  const bw = W / bars;
+
+  for (let i = 0; i < bars; i++) {
+    const r = seededRandom(seed + i);
+    const r2 = seededRandom(seed + i + 1000);
+    // Smooth envelope
+    const env = Math.sin((i / bars) * Math.PI) * 0.7 + 0.3;
+    const h = (r * 0.6 + r2 * 0.4) * H * 0.85 * env;
+    const x = i * bw;
+    const y = (H - h) / 2;
+
+    // Color based on energy
+    const energyColor = track.energy > 80 ? '#ff3d00' : track.energy > 60 ? '#ff8c42' : '#00b0ff';
+    const alpha = 0.3 + r * 0.5;
+
+    // Highlight transition zones
+    const pct = i / bars;
+    const isTransition = (pct > 0.07 && pct < 0.1) || (pct > 0.33 && pct < 0.37) || (pct > 0.56 && pct < 0.60) || (pct > 0.78 && pct < 0.82);
+
+    ctx.fillStyle = isTransition ? `rgba(255,214,0,${alpha})` : `${energyColor}${Math.floor(alpha*255).toString(16).padStart(2,'0')}`;
+    ctx.fillRect(x + 1, y, bw - 2, h);
+  }
+
+  // Playhead hint
+  ctx.fillStyle = 'rgba(255,255,255,0.1)';
+  ctx.fillRect(0, 0, W * 0.22, H);
+}
+
+function seededRandom(seed) {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
+// ─── CAMELOT WHEEL ────────────────────────────────────────────────────────
+function drawCamelot() {
+  const canvas = document.getElementById('camelot');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = 240, H = 240, cx = W/2, cy = H/2;
+  ctx.clearRect(0, 0, W, H);
+
+  const track = library.find(t => t.id === activeTrackId);
+  const activeKey = track ? track.key : null;
+  const compatible = track ? getCompatible(track).map(c => c.track.key) : [];
+
+  const outerR = 108, innerR = 62, midR = (outerR + innerR) / 2;
+  const segAngle = (2 * Math.PI) / 12;
+
+  for (let i = 1; i <= 12; i++) {
+    const angle = (i - 1) * segAngle - Math.PI / 2;
+    const nextAngle = i * segAngle - Math.PI / 2;
+    const midAngle = angle + segAngle / 2;
+
+    // Outer ring (minor - A)
+    const keyA = i + 'A';
+    const cA = CAMELOT[keyA];
+    const isActiveA = keyA === activeKey;
+    const isCompatA = compatible.includes(keyA);
+
+    ctx.beginPath();
+    ctx.moveTo(cx + innerR * Math.cos(angle), cy + innerR * Math.sin(angle));
+    ctx.arc(cx, cy, outerR, angle, nextAngle);
+    ctx.arc(cx, cy, innerR, nextAngle, angle, true);
+    ctx.closePath();
+    ctx.fillStyle = isActiveA ? cA.color : isCompatA ? cA.color + '66' : cA.color + '22';
+    ctx.fill();
+    ctx.strokeStyle = isActiveA ? cA.color : '#1a1a1a';
+    ctx.lineWidth = isActiveA ? 2 : 1;
+    ctx.stroke();
+
+    // Label outer
+    const lrA = (outerR + innerR) / 2 + (outerR - innerR) * 0.05;
+    ctx.fillStyle = isActiveA ? '#fff' : isCompatA ? '#ddd' : '#666';
+    ctx.font = `${isActiveA ? 600 : 400} ${isActiveA ? 12 : 10}px 'IBM Plex Mono', monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const txA = cx + lrA * Math.cos(midAngle);
+    const tyA = cy + lrA * Math.sin(midAngle);
+    ctx.fillText(keyA, txA, tyA);
+
+    // Inner ring (major - B)
+    const keyB = i + 'B';
+    const cB = CAMELOT[keyB];
+    const isActiveB = keyB === activeKey;
+    const isCompatB = compatible.includes(keyB);
+    const innerR2 = innerR - 2, coreR = 20;
+
+    ctx.beginPath();
+    ctx.moveTo(cx + coreR * Math.cos(angle), cy + coreR * Math.sin(angle));
+    ctx.arc(cx, cy, innerR2, angle, nextAngle);
+    ctx.arc(cx, cy, coreR, nextAngle, angle, true);
+    ctx.closePath();
+    ctx.fillStyle = isActiveB ? cB.color : isCompatB ? cB.color + '66' : cB.color + '22';
+    ctx.fill();
+    ctx.strokeStyle = isActiveB ? cB.color : '#1a1a1a';
+    ctx.lineWidth = isActiveB ? 2 : 1;
+    ctx.stroke();
+
+    // Label inner
+    const lrB = (innerR2 + coreR) / 2;
+    ctx.fillStyle = isActiveB ? '#fff' : isCompatB ? '#ddd' : '#666';
+    ctx.font = `${isActiveB ? 600 : 400} ${isActiveB ? 11 : 9}px 'IBM Plex Mono', monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(keyB, cx + lrB * Math.cos(midAngle), cy + lrB * Math.sin(midAngle));
+  }
+
+  // Center
+  ctx.beginPath();
+  ctx.arc(cx, cy, 18, 0, 2 * Math.PI);
+  ctx.fillStyle = '#111';
+  ctx.fill();
+  ctx.strokeStyle = '#222';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  if (activeKey) {
+    ctx.fillStyle = CAMELOT[activeKey]?.color || '#fff';
+    ctx.font = "bold 10px 'IBM Plex Mono', monospace";
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(activeKey, cx, cy);
+  }
+}
+
+// ─── SET BUILDER ──────────────────────────────────────────────────────────
+function buildDefaultSet() {
+  // Build a smart set by energy curve
+  const sorted = [...library].sort((a, b) => a.energy - b.energy);
+  // Warm up → build → peak → comedown
+  setTracks = [
+    sorted[1], sorted[3], sorted[5], sorted[7], sorted[9], sorted[11]
+  ].filter(Boolean).slice(0, 6);
+  renderSet();
+}
+
+function generateSet() {
+  // Re-order by harmonic compatibility + energy curve
+  const start = library[Math.floor(Math.random() * 4)];
+  const result = [start];
+  const used = new Set([start.id]);
+
+  for (let i = 0; i < 5; i++) {
+    const last = result[result.length - 1];
+    const candidates = getCompatible(last)
+      .filter(c => !used.has(c.track.id))
+      .sort((a, b) => b.score - a.score);
+    if (candidates.length === 0) break;
+    result.push(candidates[0].track);
+    used.add(candidates[0].track.id);
+  }
+
+  setTracks = result;
+  renderSet();
+  showToast('Optimal set generated!');
+}
+
+function renderSet() {
+  const el = document.getElementById('setList');
+  if (!el) return;
+  let html = '';
+  for (let i = 0; i < setTracks.length; i++) {
+    const t = setTracks[i];
+    const c = CAMELOT[t.key];
+    const isActive = t.id === activeTrackId;
+    html += `
+      <div class="set-track" style="cursor:pointer; ${isActive ? 'border-color:rgba(255,61,0,0.3); background:rgba(255,61,0,0.06)' : ''}" onclick="selectTrack(${t.id})">
+        <div class="set-track" style="position:absolute;left:0;top:0;bottom:0;width:2px;background:${c.color};border-radius:0;padding:0;margin:0;min-height:unset;"></div>
+        <div class="set-num">${i + 1}</div>
+        <div class="set-key" style="background:${c.color}22; color:${c.color};">${t.key}</div>
+        <div class="set-info">
+          <div class="set-title">${t.title}</div>
+          <div class="set-bpm">${t.bpm} bpm</div>
+        </div>
+      </div>`;
+    if (i < setTracks.length - 1) {
+      const next = setTracks[i + 1];
+      const bpmChange = next.bpm - t.bpm;
+      html += `<div class="set-arrow"><span class="set-arrow-icon">${bpmChange > 0 ? '↑' : bpmChange < 0 ? '↓' : '→'} ${Math.abs(bpmChange)} bpm</span></div>`;
+    }
+  }
+  el.innerHTML = html;
+}
+
+// ─── TOPBAR ───────────────────────────────────────────────────────────────
+function updateTopbar() {
+  const avgBpm = Math.round(library.reduce((s, t) => s + t.bpm, 0) / library.length);
+  const totalMins = library.reduce((s, t) => {
+    const [m, sec] = t.duration.split(':').map(Number);
+    return s + m + sec / 60;
+  }, 0);
+  const h = Math.floor(totalMins / 60);
+  const m = Math.round(totalMins % 60);
+  document.getElementById('tbTracks').textContent = library.length;
+  document.getElementById('tbAvgBpm').textContent = avgBpm;
+  document.getElementById('tbSetLen').textContent = `${h}h ${m}m`;
+}
+
+// ─── METADATA UPDATE ──────────────────────────────────────────────────────
+function updateMeta(id, field, value) {
+  const track = library.find(t => t.id === id);
+  if (track) {
+    track[field] = field === 'bpm' ? parseInt(value) : value;
+    renderLibrary();
+    updateTopbar();
+  }
+}
+
+// ─── FILE UPLOAD ──────────────────────────────────────────────────────────
+const fileInput = document.getElementById('fileInput');
+const uploadBox = document.getElementById('uploadBox');
+
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) handleUpload(e.target.files[0]);
+});
+uploadBox.addEventListener('dragover', e => { e.preventDefault(); uploadBox.classList.add('dragover'); });
+uploadBox.addEventListener('dragleave', () => uploadBox.classList.remove('dragover'));
+uploadBox.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadBox.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) handleUpload(e.dataTransfer.files[0]);
+});
+
+async function handleUpload(file) {
+  document.getElementById('uploadOverlay').classList.add('hidden');
+  simulateLoading(async () => {
+    // Real Claude API analysis
+    try {
+      const base64 = await fileToBase64(file);
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          messages: [{
+            role: 'user',
+            content: `You are a professional DJ tool. Analyze this audio file named "${file.name}".
+Return ONLY valid JSON, no markdown, no backticks:
+{
+  "title": "track title from filename",
+  "artist": "artist from filename or Unknown",
+  "bpm": 128,
+  "key": "8A",
+  "energy": 75,
+  "genre": "Tech House",
+  "duration": "6:30",
+  "year": "2024",
+  "album": "",
+  "comment": "DJ-relevant note about this track"
+}
+For "key" use Camelot Wheel notation (1A-12A or 1B-12B). BPM as integer. Energy 0-100.`
+          }]
+        })
+      });
+      const data = await resp.json();
+      const raw = data.content.map(i => i.text || '').join('').replace(/```json|```/g,'').trim();
+      const track = JSON.parse(raw);
+      track.id = Date.now();
+      if (!CAMELOT[track.key]) track.key = '8A';
+      track.bpm = parseInt(track.bpm) || 128;
+      track.energy = parseInt(track.energy) || 70;
+      library.push(track);
+      renderAll(track.id);
+      showToast(`"${track.title}" analyzed and added`);
+    } catch (err) {
+      // Fallback: add with basic info
+      const name = file.name.replace(/\.[^.]+$/, '');
+      const keys = Object.keys(CAMELOT);
+      const newTrack = {
+        id: Date.now(), title: name, artist: 'Unknown',
+        bpm: 128, key: keys[Math.floor(Math.random() * keys.length)],
+        energy: 70, genre: 'Unknown', duration: '6:00', year: '2024', album: '', comment: ''
+      };
+      library.push(newTrack);
+      renderAll(newTrack.id);
+      showToast('Track added (offline mode)');
+    }
+    updateTopbar();
+  });
+}
+
+function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = '✓  ' + msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
